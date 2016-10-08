@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/melvinodsa/goOdsa/forwardt"
+)
 
 func main() {
-	fmt.Println("Welcome to the ODSA Compression algorithm")
+	x := forwardt.FTransform("asdaaa")
+	fmt.Println(x.ToString())
 }
