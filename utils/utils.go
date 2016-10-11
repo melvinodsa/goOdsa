@@ -56,10 +56,7 @@ func (data *ODSAData) AddData(char byte) bool {
 	the characters after it as the array is in sorted state
 	*/
 	if pos != -1 {
-		length := len(data.pIArray)
-		for i := (pos + 1); i < length; i++ {
-			data.pIArray[i]++ //Updating the indices
-		}
+		data.updatePos(pos+1, 1, false, true) //Updating the indices
 		//Recording the noise information
 		data.nCArray = append(data.nCArray, char)
 		data.nIArray = append(data.nIArray, data.lPosition+1)
@@ -69,12 +66,8 @@ func (data *ODSAData) AddData(char byte) bool {
 	data.pCArray = append(data.pCArray[0:iPos], append([]byte{char}, data.pCArray[iPos:]...)...)
 	//Updating the PIArray with insert and updated indices that comes after the same
 	data.pIArray = append(data.pIArray[0:iPos], append([]int{data.pIArray[iPos]}, data.pIArray[iPos:]...)...)
-	length := len(data.pIArray)
-	for i := (iPos + 1); i < length; i++ {
-		//Updating the trailing indicies with new value after the addition of new element
-		data.pIArray[i]++
-		data.pMap[data.pCArray[i]]++
-	}
+	//Updating the trailing indicies with new value after the addition of new element
+	data.updatePos(iPos+1, 1, true, true)
 	//Updating the map to sync up the data with the arrays
 	data.pMap[char] = iPos
 	//Recording the noise information
@@ -83,10 +76,72 @@ func (data *ODSAData) AddData(char byte) bool {
 	return true
 }
 
+/*GetData returns the original data that was transformed
+and compressed
+*/
+func (data *ODSAData) GetData() string {
+	//Initializing the sorted variable
+	sorted := ""
+	length := len(data.pCArray) - 1
+	/*Building the sorted string by picking the psoiton index array and
+	position index array
+	*/
+	for i := 0; i < length; i++ {
+		for j := 0; j < (data.pIArray[i+1] - data.pIArray[i]); j++ {
+			sorted += string(data.pCArray[i])
+		}
+	}
+	//Handling the last character in the psotion array with lastPosition
+	for j := 0; j < (data.lPosition + 1 - data.pIArray[length]); j++ {
+		sorted += string(data.pCArray[length])
+	}
+	//Rebuilding the string from the noise fingerprint
+	length = len(data.nCArray) - 1
+	pLen := len(sorted)
+	for i := length; i >= 0; i-- {
+		/*Repositioning the noise character to its original
+		postion from the sorted position
+		*/
+		splitPos := data.pMap[data.nCArray[i]]
+		//Note the nIArray[i] will always be greater than splitPos
+		sorted = sorted[0:splitPos] + sorted[splitPos+1:]
+		if data.nIArray[i] < pLen {
+			sorted = sorted[0:data.nIArray[i]] + string(data.nCArray[i]) + sorted[data.nIArray[i]:]
+		} else {
+			sorted = sorted + string(data.nCArray[i]) //appending to the end if position is last
+		}
+		/*/Although the positions nIArray[i] gets updated
+		it won't affect the remaining alogirthm as the psotions past
+		nIArray[i] are not referenced again
+		*/
+		data.updatePos(splitPos, -1, false, true)
+	}
+	return sorted
+}
+
 //NewODSAData is the constructor function for ODSAData
 func NewODSAData() Data {
 	data := new(ODSAData)
 	data.lPosition = 0
 	data.pMap = make(map[byte]int)
 	return data
+}
+
+/*updatePos updates the position of the
+data. The arguments startValue denotes the position from which the updation
+has to start from. Increament denotes the amount with which the data has to
+be updated. mMap and pIArray boolean variables indicate whether the map/pIArray
+of the data has to be updated
+*/
+func (data *ODSAData) updatePos(startValue, increament int, pMap, pIArray bool) {
+	length := len(data.pIArray)
+	for i := startValue; i < length; i++ {
+		//Updating the map/array witn the increament
+		if pIArray {
+			data.pIArray[i] += increament
+		}
+		if pMap {
+			data.pMap[data.pCArray[i]] += increament
+		}
+	}
 }
