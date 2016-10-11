@@ -21,9 +21,12 @@ func (data *ODSAData) findPosition(char byte) (int, int) {
 	/*The given character is not existing in the PCArray.
 	Now searching for the position to insert the character
 	*/
-	if data.lLetter <= char {
+	if data.lLetter < char {
 		//Character has to be inserted at the end
 		return -1, -1
+	}
+	if char < data.pCArray[0] {
+		return -1, -3
 	}
 	var length = len(data.pCArray)
 	for i := 0; i < length-1; i++ {
@@ -57,6 +60,19 @@ func (data *ODSAData) AddData(char byte) bool {
 	*/
 	if pos != -1 {
 		data.updatePos(pos+1, 1, false, true) //Updating the indices
+		if data.lLetter > char {
+			//Recording the noise information
+			data.nCArray = append(data.nCArray, char)
+			data.nIArray = append(data.nIArray, data.lPosition+1)
+		}
+		return true
+	}
+	//Inserting the character at the begining of the position array
+	if iPos == -3 {
+		data.pCArray = append([]byte{char}, data.pCArray[:]...)
+		data.pIArray = append([]int{0}, data.pIArray[:]...)
+		data.pMap[char] = 0
+		data.updatePos(1, 1, true, true)
 		//Recording the noise information
 		data.nCArray = append(data.nCArray, char)
 		data.nIArray = append(data.nIArray, data.lPosition+1)
@@ -102,7 +118,7 @@ func (data *ODSAData) GetData() string {
 		/*Repositioning the noise character to its original
 		postion from the sorted position
 		*/
-		splitPos := data.pMap[data.nCArray[i]]
+		splitPos := data.pIArray[data.pMap[data.nCArray[i]]]
 		//Note the nIArray[i] will always be greater than splitPos
 		sorted = sorted[0:splitPos] + sorted[splitPos+1:]
 		if data.nIArray[i] < pLen {
@@ -110,11 +126,11 @@ func (data *ODSAData) GetData() string {
 		} else {
 			sorted = sorted + string(data.nCArray[i]) //appending to the end if position is last
 		}
-		/*/Although the positions nIArray[i] gets updated
-		it won't affect the remaining alogirthm as the psotions past
-		nIArray[i] are not referenced again
+		/*/Although the positions pIArray[i] gets updated
+		it won't affect the remaining alogirthm as the positions past
+		pIArray[i] are not referenced again
 		*/
-		data.updatePos(splitPos, -1, false, true)
+		data.updatePos(data.pMap[data.nCArray[i]]+1, -1, false, true)
 	}
 	return sorted
 }
