@@ -1,3 +1,5 @@
 .vscode
 debug
 *.pgm
+input.txt
+output.txt

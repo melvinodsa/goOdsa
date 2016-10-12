@@ -72,7 +72,7 @@ func (data *ODSAData) ToString() string {
 //Data interface to protect the Data
 type Data interface {
 	AddData(byte) bool
-	GetData() string
+	GetData() []byte
 	ToString() string
 	GetLastPos() int
 	SetLastPos(int)

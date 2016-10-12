@@ -95,21 +95,21 @@ func (data *ODSAData) AddData(char byte) bool {
 /*GetData returns the original data that was transformed
 and compressed
 */
-func (data *ODSAData) GetData() string {
+func (data *ODSAData) GetData() []byte {
 	//Initializing the sorted variable
-	sorted := ""
+	sorted := []byte{}
 	length := len(data.pCArray) - 1
 	/*Building the sorted string by picking the psoiton index array and
 	position index array
 	*/
 	for i := 0; i < length; i++ {
 		for j := 0; j < (data.pIArray[i+1] - data.pIArray[i]); j++ {
-			sorted += string(data.pCArray[i])
+			sorted = append(sorted, data.pCArray[i])
 		}
 	}
 	//Handling the last character in the psotion array with lastPosition
 	for j := 0; j < (data.lPosition + 1 - data.pIArray[length]); j++ {
-		sorted += string(data.pCArray[length])
+		sorted = append(sorted, data.pCArray[length])
 	}
 	//Rebuilding the string from the noise fingerprint
 	length = len(data.nCArray) - 1
@@ -120,11 +120,11 @@ func (data *ODSAData) GetData() string {
 		*/
 		splitPos := data.pIArray[data.pMap[data.nCArray[i]]]
 		//Note the nIArray[i] will always be greater than splitPos
-		sorted = sorted[0:splitPos] + sorted[splitPos+1:]
+		sorted = append(sorted[0:splitPos], sorted[splitPos+1:]...)
 		if data.nIArray[i] < pLen {
-			sorted = sorted[0:data.nIArray[i]] + string(data.nCArray[i]) + sorted[data.nIArray[i]:]
+			sorted = append(sorted[0:data.nIArray[i]], append([]byte{data.nCArray[i]}, sorted[data.nIArray[i]:]...)...)
 		} else {
-			sorted = sorted + string(data.nCArray[i]) //appending to the end if position is last
+			sorted = append(sorted, data.nCArray[i]) //appending to the end if position is last
 		}
 		/*/Although the positions pIArray[i] gets updated
 		it won't affect the remaining alogirthm as the positions past

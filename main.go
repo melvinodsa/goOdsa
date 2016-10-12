@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/melvinodsa/goOdsa/modules/cmd"
@@ -15,7 +16,7 @@ func main() {
 	if len(args) <= 1 {
 		fmt.Println("You entered no options. Please use the help flag(-h) for knowinf more.\nEg:- odsa -h")
 		fmt.Println("An examle conversion :- Text to be compressed - asdaaa\nCompressed :- ")
-		x := forwardt.FTransform("asdaaa")
+		x := forwardt.FTransform([]byte{'a', 's', 'd', 'a', 'a', 'a'})
 		fmt.Println(x.ToString())
 		return
 	}
@@ -34,7 +35,7 @@ func main() {
 		fmt.Println("No input file found")
 		return
 	}
-	input, err := utils.ReadFile(args[cmdArgs[cmd.INPUTFILE]+1])
+	input, err := ioutil.ReadFile(args[cmdArgs[cmd.INPUTFILE]+1])
 	if err != nil {
 		fmt.Println("Couldn't read the file " + args[cmdArgs[cmd.INPUTFILE]+1])
 		return
