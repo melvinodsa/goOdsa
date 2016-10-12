@@ -7,7 +7,6 @@ import (
 
 	"github.com/melvinodsa/goOdsa/modules/cmd"
 	"github.com/melvinodsa/goOdsa/modules/forwardt"
-	"github.com/melvinodsa/goOdsa/utils"
 )
 
 func main() {
@@ -42,7 +41,7 @@ func main() {
 	}
 	x := forwardt.FTransform(input)
 	if cmdArgs[cmd.OUTPUTFILE] != 0 {
-		utils.WriteFile(x.GetData(), args[cmdArgs[cmd.OUTPUTFILE]+1])
+		ioutil.WriteFile(args[cmdArgs[cmd.OUTPUTFILE]+1], x.GetData(), 0644)
 		return
 	}
 	fmt.Println(x.GetData())
