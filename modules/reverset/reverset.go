@@ -6,6 +6,6 @@ import "github.com/melvinodsa/goOdsa/utils"
 data that was passed to it as the argument data. It returns a string
 as reversed transformed data
 */
-func RTransform(data utils.Data) string {
+func RTransform(data utils.Data) []byte {
 	return data.GetData()
 }
