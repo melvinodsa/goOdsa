@@ -41,7 +41,10 @@ func main() {
 	}
 	x := forwardt.FTransform(input)
 	if cmdArgs[cmd.OUTPUTFILE] != 0 {
-		ioutil.WriteFile(args[cmdArgs[cmd.OUTPUTFILE]+1], x.GetData(), 0644)
+		err = ioutil.WriteFile(args[cmdArgs[cmd.OUTPUTFILE]+1], x.GetData(), 0644)
+		if err != nil {
+			fmt.Println("Error while writing to file " + args[cmdArgs[cmd.OUTPUTFILE]+1])
+		}
 		return
 	}
 	fmt.Println(x.GetData())
