@@ -25,7 +25,7 @@ func (data *ODSAData) findPosition(char byte) (int, int) {
 		//Character has to be inserted at the end
 		return -1, -1
 	}
-	if char < data.pCArray[0] {
+	if len(data.pCArray) == 0 || char < data.pCArray[0] {
 		return -1, -3
 	}
 	var length = len(data.pCArray)

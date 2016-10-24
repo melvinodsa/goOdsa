@@ -7,6 +7,9 @@ import (
 
 	"github.com/melvinodsa/goOdsa/modules/cmd"
 	"github.com/melvinodsa/goOdsa/modules/forwardt"
+	"github.com/melvinodsa/goOdsa/modules/preprocess"
+	"github.com/melvinodsa/goOdsa/modules/reverset"
+	"github.com/melvinodsa/goOdsa/utils"
 )
 
 func main() {
@@ -39,14 +42,22 @@ func main() {
 		fmt.Println("Couldn't read the file " + args[cmdArgs[cmd.INPUTFILE]+1])
 		return
 	}
-	x := forwardt.FTransform(input)
-	if cmdArgs[cmd.OUTPUTFILE] != 0 {
-		err = ioutil.WriteFile(args[cmdArgs[cmd.OUTPUTFILE]+1], x.GetData(), 0644)
-		if err != nil {
-			fmt.Println("Error while writing to file " + args[cmdArgs[cmd.OUTPUTFILE]+1])
-		}
-		return
-	}
-	fmt.Println(x.GetData())
+	endChannel := make(chan []utils.ChanData)
+	channel := make(chan utils.ChanData)
+	outputChannel := make(chan [][]byte)
+	dataChan := make(chan utils.ChanByte)
+	forwardt.FTransformChunk(preprocess.Chunkify(input, 200), 30, channel, endChannel)
+	reverset.RTransformChunk(30, endChannel, dataChan, outputChannel)
+	for {
+		output := <-outputChannel
 
+		if cmdArgs[cmd.OUTPUTFILE] != 0 {
+			err = ioutil.WriteFile(args[cmdArgs[cmd.OUTPUTFILE]+1], preprocess.DeChunkify(output), 0644)
+			if err != nil {
+				fmt.Println("Error while writing to file " + args[cmdArgs[cmd.OUTPUTFILE]+1])
+			}
+			return
+		}
+		fmt.Println(output)
+	}
 }

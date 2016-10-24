@@ -18,6 +18,24 @@ type ODSAData struct {
 	nCArray []byte
 	//nIArray is the index mapping of the noise with the character
 	nIArray []int
+	//chunkInfo has the index information about the chunk
+	chunkInfo int
+}
+
+/*ChanData is the wrapper struct for Data to
+be send between the go routines
+*/
+type ChanData struct {
+	Data
+	Index int
+}
+
+/*ChanByte is the wrapper struct for Index Byte array to
+be send between the go routines
+*/
+type ChanByte struct {
+	Output []byte
+	Index  int
 }
 
 //GetLastPos returns the last position of the data
